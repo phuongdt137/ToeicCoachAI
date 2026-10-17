@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ToeicCoachAI.Model/ToeicCoachAI.Model.csproj" />
+  <Project Path="ToeicCoachAI.MVC/ToeicCoachAI.MVC.csproj" />
+  <Project Path="ToeicCoachAI.Repository/ToeicCoachAI.Repository.csproj" />
+  <Project Path="ToeicCoachAI.Service/ToeicCoachAI.Service.csproj" />
+</Solution>
