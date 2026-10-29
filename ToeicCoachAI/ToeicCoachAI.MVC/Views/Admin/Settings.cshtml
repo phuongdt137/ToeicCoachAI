@@ -1,0 +1,143 @@
+@model ToeicCoachAI.Model.DTOs.Admin.AdminSettingsPageDto
+@using ToeicCoachAI.Model.Enums
+@{
+    ViewData["Title"] = "Cấu hình Credit AI & Gói cước (Settings)";
+    ViewData["ActiveNav"] = "Settings";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Header -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">
+                <i class="bi bi-sliders me-1"></i>UC-24: CREDIT RULES &amp; SUBSCRIPTION PLANS
+            </span>
+        </div>
+        <h3 class="fw-extrabold mb-1" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A;">
+            Cấu hình Định mức AI Credit &amp; Gói cước Thương mại
+        </h3>
+        <p class="text-muted small mb-0">
+            Điều chỉnh bảng giá trừ AI Credit cho các tác vụ chấm Speaking/Writing/Gia sư AI và quản lý bảng giá Gói cước (Free / Pro / Intensive).
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Credit Rules Configuration -->
+    <div class="col-lg-6">
+        <div class="tc-db-panel p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-coin text-warning me-2"></i>Định mức Trừ AI Credit (CreditRuleConfigs)
+                </h5>
+                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">@Model.CreditRules.Count tác vụ</span>
+            </div>
+            <p class="text-muted small mb-3">
+                Lưu ý: Bài thi L&amp;R (Part 1–7) chấm bằng Deterministic Engine 0đ. AI Credit chỉ trừ khi Học viên gọi Gia sư AI giải thích sâu hoặc chấm bài tự luận Speaking / Writing.
+            </p>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var rule in Model.CreditRules)
+                {
+                    <form asp-controller="Admin" asp-action="UpdateCreditRule" method="post" class="p-3 rounded-3 border bg-light">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="FeatureCode" value="@rule.FeatureCode" />
+
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="badge bg-dark text-white font-monospace">@rule.FeatureCode</span>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" name="IsActive" value="true" checked="@rule.IsActive" />
+                                <label class="form-check-label small fw-semibold">Đang áp dụng</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold text-primary mb-1">Số Credit trừ / lượt</label>
+                                <input type="number" name="CreditCost" class="form-control form-control-sm rounded-3 fw-bold" value="@rule.CreditCost" min="0" max="500" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold mb-1">Giới hạn / phút (RateLimit)</label>
+                                <input type="number" name="RateLimitPerMinute" class="form-control form-control-sm rounded-3" value="@rule.RateLimitPerMinute" min="1" max="120" required />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-sm btn-primary rounded-3 w-100 fw-semibold">
+                                    <i class="bi bi-check2 me-1"></i>Cập nhật
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Subscription Plans -->
+    <div class="col-lg-6">
+        <div class="tc-db-panel p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-gem text-primary me-2"></i>Cấu hình Gói cước Học viên (SubscriptionPlans)
+                </h5>
+                <span class="badge bg-primary-subtle text-primary rounded-pill">@Model.SubscriptionPlans.Count gói</span>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var plan in Model.SubscriptionPlans)
+                {
+                    <form asp-controller="Admin" asp-action="SaveSubscriptionPlan" method="post" class="p-3 rounded-3 border bg-white shadow-sm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@plan.Id" />
+
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary rounded-pill px-3">@plan.Code</span>
+                                <span class="fw-bold text-dark">@plan.Name</span>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" name="IsActive" value="true" checked="@plan.IsActive" />
+                                <label class="form-check-label small fw-semibold">Mở bán</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted mb-1">Mã Gói (Code)</label>
+                                <input type="text" name="Code" class="form-control form-control-sm rounded-3" value="@plan.Code" required />
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small text-muted mb-1">Tên Gói hiển thị</label>
+                                <input type="text" name="Name" class="form-control form-control-sm rounded-3" value="@plan.Name" required />
+                            </div>
+                        </div>
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-success mb-1">Giá (VNĐ)</label>
+                                <input type="number" name="PriceVnd" class="form-control form-control-sm rounded-3 fw-bold" value="@plan.PriceVnd" min="0" step="1000" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold mb-1">Số ngày</label>
+                                <input type="number" name="DurationDays" class="form-control form-control-sm rounded-3" value="@plan.DurationDays" min="1" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-primary mb-1">Credits tặng</label>
+                                <input type="number" name="GrantedCredits" class="form-control form-control-sm rounded-3 fw-bold" value="@plan.GrantedCredits" min="0" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold mb-1">Lượt/ngày</label>
+                                <input type="number" name="DailyAnalysisLimit" class="form-control form-control-sm rounded-3" value="@plan.DailyAnalysisLimit" min="1" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-sm btn-dark rounded-3 w-100 fw-semibold">
+                                    Lưu
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

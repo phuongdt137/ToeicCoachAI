@@ -1,0 +1,246 @@
+@model ToeicCoachAI.Model.DTOs.Dashboard.StudentDashboardSummaryDto
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Tiến độ & Báo cáo Chẩn đoán AI";
+    ViewData["ActiveNav"] = "Progress";
+
+    int hours = Model.WeeklyStudyMinutes / 60;
+    int mins = Model.WeeklyStudyMinutes % 60;
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">Tiến độ</h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Theo dõi điểm số ước tính, mức thành thạo từng Part (`UserSkillProficiency`) và Báo cáo Chẩn đoán Năng lực AI (`AiCompetencyReport` - UC-11).
+        </p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Practice" class="tc-db-btn-primary">
+        <i class="bi bi-file-earmark-play"></i> Luyện tập ngay
+    </a>
+</div>
+
+<!-- 3 Top KPI Cards (Matches Screenshot 5) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #ECFDF5; color: #059669;">
+                <i class="bi bi-bar-chart-line-fill"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Điểm ước tính (L&amp;R)</div>
+                <div class="tc-db-stat-value">@Model.TotalEstimatedLR</div>
+                <div class="small fw-bold mt-1" style="color: #059669;">
+                    <i class="bi bi-graph-up-arrow me-1"></i>+@Model.ScoreDeltaFromLastWeek điểm so với tuần trước
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #FFFBEB; color: #D97706;">
+                <i class="bi bi-bullseye"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Mục tiêu</div>
+                <div class="tc-db-stat-value">@Model.TotalTargetLR</div>
+                <div class="small text-muted mt-1">
+                    <span class="text-warning me-1">●</span>Còn @Model.RemainingScoreGap điểm (Writing mục tiêu: @Model.TargetWriting)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-calendar3"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Lộ trình cá nhân hóa</div>
+                <div class="tc-db-stat-value" style="font-size: 1.75rem;">Tuần 3/8</div>
+                <div class="small text-muted mt-1">
+                    @Model.CompletedLessonsCount/@Model.TotalLessonsCount bài giảng đã hoàn thành
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Middle 2 Columns: Score Trajectory Over Time + Mastery By Part (Matches Screenshot 5) -->
+<div class="row g-3 mb-4">
+    <!-- Left Column: SVG Score Chart -->
+    <div class="col-lg-6">
+        <div class="tc-db-card">
+            <h6 class="fw-bold mb-3">Điểm ước tính theo thời gian</h6>
+            <svg viewBox="0 0 460 280" width="100%" height="290" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="progressChartGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#3B5BDB" stop-opacity="0.22"/>
+                        <stop offset="100%" stop-color="#3B5BDB" stop-opacity="0.0"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- Horizontal grid lines -->
+                <line x1="45" y1="35" x2="430" y2="35" stroke="#F1F5F9" stroke-width="1"/>
+                <line x1="45" y1="90" x2="430" y2="90" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4"/>
+                <line x1="45" y1="145" x2="430" y2="145" stroke="#F1F5F9" stroke-width="1"/>
+                <line x1="45" y1="200" x2="430" y2="200" stroke="#F1F5F9" stroke-width="1"/>
+                <line x1="45" y1="245" x2="430" y2="245" stroke="#F1F5F9" stroke-width="1"/>
+
+                <!-- Y labels -->
+                <text x="12" y="39" fill="#9CA3AF" font-size="11">900</text>
+                <text x="12" y="94" fill="#9CA3AF" font-size="11">@Model.TotalTargetLR</text>
+                <text x="12" y="149" fill="#9CA3AF" font-size="11">600</text>
+                <text x="12" y="204" fill="#9CA3AF" font-size="11">450</text>
+                <text x="12" y="249" fill="#9CA3AF" font-size="11">300</text>
+
+                <!-- X labels -->
+                <text x="58" y="268" fill="#6B7280" font-size="11" text-anchor="middle">31/08</text>
+                <text x="150" y="268" fill="#6B7280" font-size="11" text-anchor="middle">18/09</text>
+                <text x="245" y="268" fill="#6B7280" font-size="11" text-anchor="middle">07/10</text>
+                <text x="335" y="268" fill="#6B7280" font-size="11" text-anchor="middle">26/10</text>
+                <text x="415" y="268" fill="#6B7280" font-size="11" text-anchor="middle">14/11</text>
+
+                <!-- Shaded Area -->
+                <path d="M58 178 L105 166 L150 158 L195 148 L195 245 L58 245 Z" fill="url(#progressChartGrad)"/>
+
+                <!-- Actual Score Line -->
+                <path d="M58 178 L105 166 L150 158 L195 148" fill="none" stroke="#0EA5E9" stroke-width="3"/>
+
+                <!-- Forecast Line -->
+                <path d="M195 148 L275 125 L350 106 L415 90" fill="none" stroke="#3B5BDB" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+                <!-- Data Points -->
+                <circle cx="58" cy="178" r="5" fill="#10B981"/>
+                <circle cx="105" cy="166" r="4.5" fill="#FFFFFF" stroke="#0EA5E9" stroke-width="2.5"/>
+                <circle cx="150" cy="158" r="4.5" fill="#FFFFFF" stroke="#0EA5E9" stroke-width="2.5"/>
+                <circle cx="195" cy="148" r="5.5" fill="#3B5BDB"/>
+                <circle cx="415" cy="90" r="4.5" fill="#F59E0B"/>
+
+                <!-- Labels -->
+                <rect x="42" y="148" width="38" height="20" rx="6" fill="#10B981"/>
+                <text x="61" y="162" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">520</text>
+
+                <rect x="155" y="116" width="80" height="22" rx="6" fill="#3B5BDB"/>
+                <text x="195" y="131" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">Hiện tại @Model.TotalEstimatedLR</text>
+
+                <rect x="345" y="60" width="82" height="22" rx="6" fill="#FEF3C7"/>
+                <text x="386" y="75" fill="#B45309" font-size="10" font-weight="bold" text-anchor="middle">Mục tiêu @Model.TotalTargetLR</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Right Column: Mastery by Part (Listening, Reading, Writing) -->
+    <div class="col-lg-6">
+        <div class="tc-db-card">
+            <h6 class="fw-bold mb-3">Mức thành thạo theo Kỹ năng &amp; Part</h6>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var p in Model.PartMasteries.Take(8))
+                {
+                    var barColor = p.MasteryPercent < 50 ? "#EF4444" : (p.MasteryPercent >= 60 ? "#10B981" : "#3B5BDB");
+                    <div class="row align-items-center g-2">
+                        <div class="col-4">
+                            <div class="fw-bold small text-dark lh-sm">@p.PartTitle</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">@p.PartSubtitle</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="progress" style="height: 7px; background: #F1F5F9; border-radius: 999px;">
+                                <div class="progress-bar" style="width: @(p.MasteryPercent)%; background: @barColor; border-radius: 999px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-2 text-end">
+                            <span class="small fw-bold" style="color: @barColor;">@p.MasteryPercent%</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom 2 Columns: Weekly Study Time Bar Chart + AI Competency Diagnosis Report (UC-11) -->
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="tc-db-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Thời gian học tuần này</h6>
+                <span class="badge rounded-pill" style="background: #EEF2FF; color: #3B5BDB; font-weight: 700;">
+                    @hours giờ @mins phút
+                </span>
+            </div>
+
+            <div class="d-flex align-items-end justify-content-between pt-3 px-2" style="height: 150px;">
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">60p</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 75px; background: #3B5BDB;"></div>
+                    <div class="small fw-semibold text-muted mt-2">T2</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">75p</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 95px; background: #3B5BDB;"></div>
+                    <div class="small fw-semibold text-muted mt-2">T3</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">70p</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 88px; background: #3B5BDB;"></div>
+                    <div class="small fw-semibold text-muted mt-2">T4</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">55p</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 68px; background: #10B981;"></div>
+                    <div class="small fw-bold text-dark mt-2">T5</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">-</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 12px; background: #E5E7EB;"></div>
+                    <div class="small text-muted mt-2">T6</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">-</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 12px; background: #E5E7EB;"></div>
+                    <div class="small text-muted mt-2">T7</div>
+                </div>
+                <div class="text-center flex-fill">
+                    <div class="small text-muted mb-1">-</div>
+                    <div class="mx-auto rounded-top" style="width: 28px; height: 12px; background: #E5E7EB;"></div>
+                    <div class="small text-muted mt-2">CN</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="tc-db-card">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-robot text-primary me-1"></i>Báo cáo Chẩn đoán Năng lực AI (`AiCompetencyReport` - UC-11)
+                </h6>
+                <span class="badge rounded-pill bg-warning bg-opacity-15 text-dark border border-warning">
+                    <i class="bi bi-lightning-charge-fill text-warning me-1"></i>5 Credits / lần phân tích
+                </span>
+            </div>
+
+            <div class="p-3 rounded-4 mb-3" style="background: #F4F6FF; border: 1px solid #DCE3FF;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-primary">Nhận xét tổng thể từ AI Coach</span>
+                    <span class="text-muted" style="font-size: 0.72rem;">Nguồn: @Model.LatestAiReport?.TriggerSource</span>
+                </div>
+                <p class="small text-dark mb-0" style="line-height: 1.55;">
+                    @Model.LatestAiReport?.OverallSummary
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-muted">
+                    Số dư hiện tại: <strong class="text-primary">@Model.CreditBalance Credits</strong>
+                </div>
+                <button type="button" class="tc-db-btn-primary" onclick="alert('Tính năng yêu cầu AI tổng hợp báo cáo năng lực chuyên sâu (5 Credits) sẽ sử dụng cơ chế HOLD -> COMMIT/REFUND trên bảng CreditTransactions!')">
+                    <i class="bi bi-stars"></i> Yêu cầu AI Chẩn đoán mới (5 Credits)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,245 @@
+@model ToeicCoachAI.Model.DTOs.Dashboard.StudentDashboardSummaryDto
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Luyện tập thông minh 3 kỹ năng";
+    ViewData["ActiveNav"] = "Practice";
+
+    var listeningParts = Model.PartMasteries.Where(p => p.SkillCategory == "LISTENING").ToList();
+    var readingParts = Model.PartMasteries.Where(p => p.SkillCategory == "READING").ToList();
+    var writingParts = Model.PartMasteries.Where(p => p.SkillCategory == "WRITING").ToList();
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">Luyện tập</h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Chọn kỹ năng luyện tập phù hợp (Listening, Reading, Writing) hoặc để AI đề xuất theo điểm yếu của bạn.
+        </p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Tests" class="tc-db-btn-outline">
+        <i class="bi bi-sliders"></i> Tạo bài luyện tùy chỉnh
+    </a>
+</div>
+
+<!-- Mode Switch Tabs -->
+<div class="d-flex gap-2 mb-4">
+    <a asp-controller="Dashboard" asp-action="Practice" class="tc-db-btn-primary py-2 px-3">
+        <i class="bi bi-grid"></i> Luyện theo Kỹ năng &amp; Part
+    </a>
+    <a asp-controller="Dashboard" asp-action="Tests" class="tc-db-btn-outline py-2 px-3 bg-white border">
+        <i class="bi bi-file-earmark-check"></i> Đề thi thử Full / Mini
+    </a>
+</div>
+
+<!-- Hero AI Recommendation Banner (Matches Screenshot 2) -->
+<div class="tc-db-hero-card mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="tc-db-hero-badge mb-2 bg-white border">
+                <i class="bi bi-stars text-primary"></i> AI đề xuất cho bạn (Smart Practice - UC-06)
+            </span>
+            <h3 class="fw-extrabold text-dark mt-1 mb-2" style="font-size: 1.6rem;">
+                Cải thiện @Model.PriorityRecommendation.Title
+            </h3>
+            <p class="text-muted mb-3" style="font-size: 0.92rem;">
+                @Model.PriorityRecommendation.Reason
+            </p>
+            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mb-3">
+                <span><i class="bi bi-file-text me-1"></i>@Model.PriorityRecommendation.QuestionCount câu hỏi</span>
+                <span><i class="bi bi-clock me-1"></i>@Model.PriorityRecommendation.EstimatedMinutes phút</span>
+                <span><i class="bi bi-bar-chart me-1"></i>Mức độ: @Model.PriorityRecommendation.DifficultyLabel</span>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <a href="#practice-grid" class="tc-db-btn-primary">
+                    Bắt đầu luyện <i class="bi bi-arrow-right"></i>
+                </a>
+                <a asp-controller="Dashboard" asp-action="Progress" class="text-decoration-underline fw-bold small" style="color: var(--db-primary);">
+                    Vì sao TOEIC Coach AI đề xuất bài này?
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-5 d-flex justify-content-lg-end justify-content-start align-items-center gap-3">
+            <!-- Circular Ring -->
+            <div class="text-center">
+                <div class="tc-ring-box">
+                    <svg width="108" height="108" viewBox="0 0 108 108">
+                        <circle cx="54" cy="54" r="44" fill="none" stroke="#DCE3FF" stroke-width="10" />
+                        <circle cx="54" cy="54" r="44" fill="none" stroke="#3B5BDB" stroke-width="10"
+                                stroke-dasharray="276" stroke-dashoffset="155" stroke-linecap="round"
+                                transform="rotate(-90 54 54)" />
+                    </svg>
+                    <div class="position-absolute fw-extrabold fs-4 text-dark">
+                        @Model.PriorityRecommendation.CurrentMasteryPercent%
+                    </div>
+                </div>
+                <div class="small text-muted mt-1">Hiện tại <strong>@Model.PriorityRecommendation.CurrentMasteryPercent%</strong></div>
+            </div>
+
+            <i class="bi bi-arrow-right text-primary fs-5"></i>
+
+            <!-- Target Box -->
+            <div class="bg-white rounded-4 p-3 shadow-sm border text-center" style="min-width: 118px;">
+                <div class="text-warning mb-1"><i class="bi bi-bullseye fs-5"></i></div>
+                <div class="text-muted" style="font-size: 0.75rem;">Mục tiêu</div>
+                <div class="fw-extrabold fs-4 text-dark">@Model.PriorityRecommendation.TargetMasteryPercent%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3" id="practice-grid">
+    <h5 class="fw-bold mb-0">Luyện theo Kỹ năng (Listening • Reading • Writing)</h5>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="tc-db-filter-pill active" onclick="filterSkillSection('ALL', this)">Tất cả</button>
+        <button type="button" class="tc-db-filter-pill" onclick="filterSkillSection('LISTENING', this)">Listening (Part 1–4)</button>
+        <button type="button" class="tc-db-filter-pill" onclick="filterSkillSection('READING', this)">Reading (Part 5–7)</button>
+        <button type="button" class="tc-db-filter-pill" onclick="filterSkillSection('WRITING', this)">Writing (Chấm AI)</button>
+    </div>
+</div>
+
+<!-- Listening & Reading Row (Matches Screenshot 2 Layout) -->
+<div class="row g-4 mb-4">
+    <!-- Listening Column (Part 1-4) -->
+    <div class="col-xl-6 skill-section" data-skill="LISTENING">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-headphones text-primary fs-5"></i>
+            <span class="fw-bold text-primary">Listening</span>
+            <span class="text-muted small">(Part 1–4 • Luyện phản xạ âm thanh &amp; bẫy đồng âm)</span>
+        </div>
+        <div class="row g-3">
+            @foreach (var p in listeningParts)
+            {
+                var barColor = p.MasteryPercent >= 60 ? "#10B981" : "#3B5BDB";
+                <div class="col-sm-6 col-md-3">
+                    <div class="tc-db-part-card">
+                        <div class="tc-db-stat-icon mb-3" style="background: #EEF2FF; color: #3B5BDB; width: 38px; height: 38px; font-size: 1rem;">
+                            <i class="bi @p.IconClass"></i>
+                        </div>
+                        <div class="fw-bold text-dark">@p.PartTitle</div>
+                        <div class="text-muted small mb-3" style="min-height: 36px;">@p.PartSubtitle</div>
+
+                        <div class="mt-auto">
+                            <div class="fw-bold small mb-1" style="color: @barColor;">@p.MasteryPercent% thành thạo</div>
+                            <div class="progress mb-2" style="height: 5px; background: #E5E7EB; border-radius: 999px;">
+                                <div class="progress-bar" style="width: @(p.MasteryPercent)%; background: @barColor;"></div>
+                            </div>
+                            <div class="text-muted mb-3" style="font-size: 0.76rem;">
+                                <i class="bi bi-file-earmark-text me-1"></i>@p.TopicCount chủ đề
+                            </div>
+                            <a href="#" class="tc-db-btn-outline w-100 py-1" style="font-size: 0.8rem;">Luyện ngay</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Reading Column (Part 5-7) -->
+    <div class="col-xl-6 skill-section" data-skill="READING">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-book text-primary fs-5"></i>
+            <span class="fw-bold text-primary">Reading</span>
+            <span class="text-muted small">(Part 5–7 • Giải thích AI sâu &amp; Chat hỏi đáp ngữ cảnh)</span>
+        </div>
+        <div class="row g-3">
+            @foreach (var p in readingParts)
+            {
+                var barColor = p.IsPriority ? "#DC2626" : "#3B5BDB";
+                <div class="col-sm-6 col-md-4">
+                    <div class="tc-db-part-card @(p.IsPriority ? "priority-border" : "")">
+                        @if (p.IsPriority)
+                        {
+                            <span class="tc-db-priority-chip">
+                                <i class="bi bi-bullseye"></i> Cần ưu tiên
+                            </span>
+                        }
+                        <div class="tc-db-stat-icon mb-3" style="background: #EEF2FF; color: #3B5BDB; width: 38px; height: 38px; font-size: 1rem;">
+                            <i class="bi @p.IconClass"></i>
+                        </div>
+                        <div class="fw-bold text-dark">@p.PartTitle</div>
+                        <div class="text-muted small mb-3" style="min-height: 36px;">@p.PartSubtitle</div>
+
+                        <div class="mt-auto">
+                            <div class="fw-bold small mb-1" style="color: @barColor;">@p.MasteryPercent% thành thạo</div>
+                            <div class="progress mb-2" style="height: 5px; background: #E5E7EB; border-radius: 999px;">
+                                <div class="progress-bar" style="width: @(p.MasteryPercent)%; background: @barColor;"></div>
+                            </div>
+                            <div class="text-muted mb-3" style="font-size: 0.76rem;">
+                                <i class="bi bi-file-earmark-text me-1"></i>@p.TopicCount chủ đề
+                            </div>
+                            <a href="#" class="tc-db-btn-outline w-100 py-1" style="font-size: 0.8rem;">Luyện ngay</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Writing Skill Section (UC-08: AI Writing Evaluation & Feedback) -->
+<div class="skill-section" data-skill="WRITING" id="writing-section">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-pen text-primary fs-5"></i>
+            <span class="fw-bold text-primary">TOEIC Writing (Q1–Q8)</span>
+            <span class="text-muted small">(Chấm điểm tự động theo tiêu chí ETS, sửa lỗi ngữ pháp &amp; viết lại bài mẫu Band 200 - UC-08)</span>
+        </div>
+        <span class="badge rounded-pill bg-warning bg-opacity-15 text-dark border border-warning px-3 py-1">
+            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>AI Writing Grading: 3 Credits / bài
+        </span>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var w in writingParts)
+        {
+            var barColor = w.IsPriority ? "#D97706" : "#10B981";
+            <div class="col-md-4">
+                <div class="tc-db-part-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="tc-db-stat-icon" style="background: #ECFDF5; color: #059669; width: 40px; height: 40px;">
+                            <i class="bi @w.IconClass"></i>
+                        </div>
+                        <span class="badge rounded-pill bg-light text-primary border small">
+                            <i class="bi bi-robot me-1"></i>@w.CreditCost Credits / lần chấm
+                        </span>
+                    </div>
+                    <div class="fw-bold text-dark fs-6 mt-1">@w.PartTitle</div>
+                    <div class="text-muted small mb-3">@w.PartSubtitle</div>
+
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span style="color: @barColor;">@w.MasteryPercent% thành thạo</span>
+                            <span class="text-muted">@w.TopicCount đề luyện</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 6px; background: #E5E7EB; border-radius: 999px;">
+                            <div class="progress-bar" style="width: @(w.MasteryPercent)%; background: @barColor;"></div>
+                        </div>
+                        <a href="#" class="tc-db-btn-primary w-100 py-2">
+                            <i class="bi bi-pencil-square"></i> Viết &amp; Chấm điểm AI
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterSkillSection(skill, btn) {
+            document.querySelectorAll('#practice-grid .tc-db-filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('.skill-section').forEach(sec => {
+                if (skill === 'ALL' || sec.getAttribute('data-skill') === skill) {
+                    sec.style.display = '';
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

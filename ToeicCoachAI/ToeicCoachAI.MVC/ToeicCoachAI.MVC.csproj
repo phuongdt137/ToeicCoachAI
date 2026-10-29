@@ -6,4 +6,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.17" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.17" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ToeicCoachAI.Model\ToeicCoachAI.Model.csproj" />
+    <ProjectReference Include="..\ToeicCoachAI.Repository\ToeicCoachAI.Repository.csproj" />
+    <ProjectReference Include="..\ToeicCoachAI.Service\ToeicCoachAI.Service.csproj" />
+  </ItemGroup>
+
 </Project>

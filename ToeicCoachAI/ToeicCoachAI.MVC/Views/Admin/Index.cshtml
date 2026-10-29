@@ -1,0 +1,213 @@
+@model ToeicCoachAI.Model.DTOs.Admin.AdminDashboardSummaryDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Tổng quan Kho đề & AI Pipeline";
+    ViewData["ActiveNav"] = "Overview";
+
+    var questionSkillTags = Model.SkillTagInventories
+        .Where(t => t.Category != ToeicCoachAI.Model.Enums.SkillCategory.VOCAB_TOPIC)
+        .ToList();
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">
+            Trung tâm Quản trị Kho đề &amp; AI Pipeline
+        </h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Giám sát định mức tồn kho câu hỏi (`MinPoolThreshold`), trạng thái kiểm định chéo Dual-AI và danh mục kỹ năng (`SkillTag` - UC-16).
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="SkillTags" class="tc-db-btn-outline">
+            <i class="bi bi-tags"></i> Cấu hình Nhãn &amp; Luật AI
+        </a>
+        <a asp-controller="Admin" asp-action="AiPipeline" class="tc-db-btn-primary">
+            <i class="bi bi-robot"></i> Khởi chạy AI Tạo đề
+        </a>
+    </div>
+</div>
+
+<!-- 4 KPI Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #ECFDF5; color: #059669;">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Cụm đề Đã xuất bản (`PUBLISHED`)</div>
+                <div class="tc-db-stat-value">@Model.TotalPublishedGroups</div>
+                <div class="small text-muted mt-1">Tổng cộng <strong>@Model.TotalQuestions</strong> câu hỏi</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #FEF2F2; color: #DC2626;">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Khu cách ly (`QUARANTINED`)</div>
+                <div class="tc-db-stat-value text-danger">@Model.TotalQuarantinedGroups</div>
+                <div class="small text-muted mt-1">Đang chờ Admin hậu kiểm (`UC-19`)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #FFFBEB; color: #D97706;">
+                <i class="bi bi-exclamation-diamond"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Nhãn thiếu hụt tồn kho</div>
+                <div class="tc-db-stat-value" style="color: #D97706;">@Model.LowInventoryTagsCount / @questionSkillTags.Count</div>
+                <div class="small text-muted mt-1">Dưới ngưỡng <code>MinPoolThreshold</code></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-xl-3">
+        <div class="tc-db-card d-flex align-items-center gap-3">
+            <div class="tc-db-stat-icon" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-people"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Học viên Hệ thống</div>
+                <div class="tc-db-stat-value">@Model.TotalUsersCount</div>
+                <div class="small text-success fw-bold mt-1">@Model.PaidUsersCount tài khoản PAID (PRO)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main 2 Columns: SkillTag Pool Inventory Monitor + Recent AI Generation Jobs -->
+<div class="row g-4">
+    <!-- Left Column: SkillTag Pool Inventory Table -->
+    <div class="col-lg-8">
+        <div class="tc-db-card">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h6 class="fw-bold mb-1">
+                        <i class="bi bi-boxes text-primary me-1"></i>Giám sát Tồn kho Câu hỏi theo Nhãn Kỹ năng (`SkillTag`)
+                    </h6>
+                    <p class="text-muted small mb-0">
+                        Cron Job Hangfire lúc 02:00 AM sẽ tự động quét các nhãn có số câu <code>PUBLISHED &lt; MinPoolThreshold</code> để kích hoạt AI sinh bù.
+                    </p>
+                </div>
+                <a asp-controller="Admin" asp-action="SkillTags" class="small fw-bold text-primary text-decoration-none">
+                    Quản lý tất cả (@Model.TotalSkillTags) <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Mã &amp; Tên Kỹ năng</th>
+                            <th>Phân loại</th>
+                            <th style="min-width: 170px;">Tồn kho (`PUBLISHED` / Ngưỡng)</th>
+                            <th class="text-center">Cách ly</th>
+                            <th class="text-end">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in questionSkillTags)
+                        {
+                            var barColor = item.FillPercentage >= 100 ? "#10B981" : (item.FillPercentage >= 50 ? "#3B5BDB" : "#F59E0B");
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.Name</div>
+                                    <code style="font-size: 0.75rem;">@item.Code</code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@item.Category</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                                        <span>@item.PublishedQuestionCount / @item.MinPoolThreshold câu</span>
+                                        <span style="color: @barColor;">@item.FillPercentage%</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; background: #E5E7EB; border-radius: 999px;">
+                                        <div class="progress-bar" style="width: @(Math.Max(4, item.FillPercentage))%; background: @barColor; border-radius: 999px;"></div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.QuarantinedQuestionCount > 0)
+                                    {
+                                        <span class="badge rounded-pill bg-danger">@item.QuarantinedQuestionCount</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">0</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (item.IsLowInventory)
+                                    {
+                                        <span class="badge rounded-pill" style="background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A;">
+                                            Thiếu @item.DeficitCount câu
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill" style="background: #ECFDF5; color: #059669;">
+                                            Đủ định mức
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Recent AI Generation Jobs -->
+    <div class="col-lg-4">
+        <div class="tc-db-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-cpu text-primary me-1"></i>Tiến trình AI Sinh đề (`AiGenerationJob`)
+                </h6>
+                <a href="/hangfire" target="_blank" class="small text-decoration-none fw-semibold">Hangfire</a>
+            </div>
+
+            @if (Model.RecentJobs.Count == 0)
+            {
+                <div class="text-center py-4 px-2 border rounded-4 bg-light bg-opacity-50">
+                    <div class="text-primary mb-2"><i class="bi bi-robot fs-2"></i></div>
+                    <div class="fw-bold small text-dark mb-1">Chưa có tiến trình AI nào chạy</div>
+                    <p class="text-muted mb-3" style="font-size: 0.78rem;">
+                        Hãy kiểm tra Luật sinh đề (`AiGenerationRules`) ở mục Nhãn Kỹ năng trước khi khởi chạy Job đầu tiên ở Phase 2.
+                    </p>
+                    <a asp-controller="Admin" asp-action="SkillTags" class="tc-db-btn-outline py-1 px-3" style="font-size: 0.8rem;">
+                        Xem Luật sinh đề AI
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var job in Model.RecentJobs)
+                    {
+                        <div class="p-3 rounded-4 border bg-light bg-opacity-50">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-primary">@job.TriggerType</span>
+                                <span class="badge @(job.Status == "COMPLETED" ? "bg-success" : "bg-warning text-dark")">@job.Status</span>
+                            </div>
+                            <div class="fw-bold small text-dark">@job.SkillTagName</div>
+                            <div class="text-muted" style="font-size: 0.76rem;">
+                                Yêu cầu: @job.RequestedCount • Xuất bản: <strong class="text-success">@job.PublishedCount</strong> • Cách ly: <strong class="text-danger">@job.QuarantinedCount</strong>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

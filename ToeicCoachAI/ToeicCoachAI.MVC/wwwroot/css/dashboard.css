@@ -1,0 +1,539 @@
+/* ==========================================================================
+   TOEIC COACH AI - STUDENT DASHBOARD DESIGN SYSTEM
+   Inspired by modern EdTech workspace layout (Sidebar + Topbar + Soft Cards)
+   ========================================================================== */
+
+:root {
+    --db-bg: #F6F7FB;
+    --db-surface: #FFFFFF;
+    --db-primary: #25389C;
+    --db-primary-hover: #1D2C7E;
+    --db-primary-soft: #EEF1FF;
+    --db-accent-blue: #3B5BDB;
+    --db-emerald: #10B981;
+    --db-emerald-soft: #ECFDF5;
+    --db-amber: #F59E0B;
+    --db-amber-soft: #FFFBEB;
+    --db-danger: #EF4444;
+    --db-danger-soft: #FEF2F2;
+    --db-text-main: #111827;
+    --db-text-secondary: #4B5563;
+    --db-text-muted: #6B7280;
+    --db-border: #EAECEF;
+    --db-sidebar-width: 248px;
+    --db-radius-lg: 18px;
+    --db-radius-md: 14px;
+    --db-shadow-sm: 0 2px 10px rgba(17, 24, 39, 0.03);
+    --db-shadow-md: 0 8px 24px rgba(37, 56, 156, 0.06);
+}
+
+body.tc-dashboard-body {
+    background-color: var(--db-bg);
+    color: var(--db-text-main);
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Shell Layout */
+.tc-db-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Left Sidebar */
+.tc-db-sidebar {
+    width: var(--db-sidebar-width);
+    background: var(--db-surface);
+    border-right: 1px solid var(--db-border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1030;
+    padding: 1.25rem 0.9rem;
+}
+
+.tc-db-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.25rem 0.65rem 1.25rem;
+    text-decoration: none;
+}
+
+.tc-db-brand img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+}
+
+.tc-db-brand-title {
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+    color: var(--db-primary);
+    line-height: 1.1;
+}
+
+.tc-db-brand-sub {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--db-emerald);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.tc-db-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-db-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.68rem 0.9rem;
+    border-radius: 12px;
+    color: var(--db-text-secondary);
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.tc-db-nav-link i {
+    font-size: 1.1rem;
+    color: var(--db-text-muted);
+    transition: color 0.18s ease;
+}
+
+.tc-db-nav-link:hover {
+    background: #F3F5FC;
+    color: var(--db-primary);
+}
+
+.tc-db-nav-link:hover i {
+    color: var(--db-primary);
+}
+
+.tc-db-nav-link.active {
+    background: var(--db-primary-soft);
+    color: var(--db-primary);
+    font-weight: 700;
+}
+
+.tc-db-nav-link.active i {
+    color: var(--db-primary);
+}
+
+.tc-db-sidebar-divider {
+    height: 1px;
+    background: var(--db-border);
+    margin: 1rem 0.5rem;
+}
+
+/* Sidebar Upgrade Promo Card */
+.tc-db-upgrade-box {
+    margin-top: auto;
+    background: linear-gradient(145deg, #EEF2FF 0%, #F5F7FF 100%);
+    border: 1px solid #DDE4FF;
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+.tc-db-upgrade-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #FFFBEB;
+    color: #D97706;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+}
+
+.tc-db-btn-primary {
+    background: var(--db-primary);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 11px;
+    padding: 0.55rem 1.1rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.tc-db-btn-primary:hover {
+    background: var(--db-primary-hover);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.tc-db-btn-outline {
+    background: #FFFFFF;
+    color: var(--db-primary);
+    border: 1.5px solid #D0D7F7;
+    border-radius: 11px;
+    padding: 0.52rem 1.1rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.tc-db-btn-outline:hover {
+    background: var(--db-primary-soft);
+    border-color: var(--db-primary);
+    color: var(--db-primary);
+}
+
+/* Main Content Area */
+.tc-db-main {
+    margin-left: var(--db-sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Top Header Bar */
+.tc-db-topbar {
+    height: 70px;
+    background: rgba(246, 247, 251, 0.92);
+    backdrop-filter: blur(8px);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.tc-db-search {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+}
+
+.tc-db-search i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--db-text-muted);
+    font-size: 0.95rem;
+}
+
+.tc-db-search input {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid var(--db-border);
+    border-radius: 12px;
+    padding: 0.58rem 1rem 0.58rem 2.6rem;
+    font-size: 0.9rem;
+    color: var(--db-text-main);
+    box-shadow: var(--db-shadow-sm);
+    outline: none;
+    transition: border-color 0.18s ease;
+}
+
+.tc-db-search input:focus {
+    border-color: var(--db-accent-blue);
+}
+
+.tc-db-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tc-db-pill-streak {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    color: #B45309;
+    font-weight: 700;
+    font-size: 0.83rem;
+    padding: 0.38rem 0.85rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tc-db-pill-credit {
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    color: var(--db-primary);
+    font-weight: 700;
+    font-size: 0.83rem;
+    padding: 0.38rem 0.85rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+}
+
+.tc-db-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--db-border);
+    color: var(--db-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--db-shadow-sm);
+}
+
+.tc-db-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #E0E7FF;
+    color: var(--db-primary);
+    font-weight: 800;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Content Container */
+.tc-db-content {
+    padding: 0.5rem 2rem 2.5rem;
+    max-width: 1280px;
+    width: 100%;
+}
+
+/* Hero Banner Card (Soft Lavender/Blue Gradient like Screenshot 1, 2, 3) */
+.tc-db-hero-card {
+    background: linear-gradient(135deg, #F4F6FF 0%, #EEF2FF 60%, #E6ECFF 100%);
+    border: 1px solid #DCE3FF;
+    border-radius: var(--db-radius-lg);
+    padding: 1.65rem 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--db-shadow-md);
+}
+
+.tc-db-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #E0E7FF;
+    color: var(--db-primary);
+    font-weight: 700;
+    font-size: 0.76rem;
+    padding: 0.28rem 0.75rem;
+    border-radius: 999px;
+}
+
+/* White Surface Cards */
+.tc-db-card {
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius-lg);
+    padding: 1.35rem 1.5rem;
+    box-shadow: var(--db-shadow-sm);
+    height: 100%;
+}
+
+.tc-db-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.tc-db-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--db-text-main);
+}
+
+/* Filter Pill Buttons */
+.tc-db-filter-pill {
+    background: #FFFFFF;
+    border: 1px solid var(--db-border);
+    color: var(--db-text-secondary);
+    font-weight: 600;
+    font-size: 0.82rem;
+    padding: 0.38rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.tc-db-filter-pill:hover {
+    border-color: var(--db-primary);
+    color: var(--db-primary);
+}
+
+.tc-db-filter-pill.active {
+    background: var(--db-primary);
+    border-color: var(--db-primary);
+    color: #FFFFFF;
+}
+
+/* Part Card in Practice Page */
+.tc-db-part-card {
+    background: #FFFFFF;
+    border: 1px solid var(--db-border);
+    border-radius: 16px;
+    padding: 1.15rem;
+    transition: all 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.tc-db-part-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--db-shadow-md);
+}
+
+.tc-db-part-card.priority-border {
+    border: 1.5px solid #FCA5A5;
+    background: linear-gradient(180deg, #FFFDFD 0%, #FFFFFF 100%);
+}
+
+.tc-db-priority-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: #FEF2F2;
+    color: #DC2626;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    margin-bottom: 0.5rem;
+    width: fit-content;
+}
+
+/* Vocab Card in Vocab Page */
+.tc-db-vocab-card {
+    background: #FFFFFF;
+    border: 1px solid var(--db-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 100%;
+    position: relative;
+}
+
+.tc-db-vocab-card:hover {
+    border-color: #C7D2FE;
+    box-shadow: var(--db-shadow-md);
+    transform: translateY(-2px);
+}
+
+.tc-vocab-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 0.65rem;
+}
+
+.tc-vocab-badge.mastered {
+    background: #ECFDF5;
+    color: #059669;
+}
+
+.tc-vocab-badge.learning {
+    background: #EEF2FF;
+    color: #3B5BDB;
+}
+
+.tc-vocab-badge.new-word {
+    background: #FFFBEB;
+    color: #D97706;
+}
+
+/* Circular Progress Ring */
+.tc-ring-box {
+    width: 108px;
+    height: 108px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Week Day Circle */
+.tc-day-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.tc-day-circle.done {
+    background: #10B981;
+    color: #FFFFFF;
+}
+
+.tc-day-circle.today {
+    background: #4F46E5;
+    color: #FFFFFF;
+    box-shadow: 0 0 0 4px #E0E7FF;
+}
+
+.tc-day-circle.upcoming {
+    background: #FFFFFF;
+    border: 1.5px dashed #D1D5DB;
+    color: #9CA3AF;
+}
+
+@media (max-width: 991.98px) {
+    .tc-db-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+    .tc-db-sidebar.show {
+        transform: translateX(0);
+    }
+    .tc-db-main {
+        margin-left: 0;
+    }
+}

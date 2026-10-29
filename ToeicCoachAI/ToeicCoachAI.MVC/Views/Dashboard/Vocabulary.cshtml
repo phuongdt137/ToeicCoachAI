@@ -1,0 +1,152 @@
+@model ToeicCoachAI.Model.DTOs.Dashboard.VocabHubPageDto
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Từ vựng SRS & Sổ tay lỗi sai";
+    ViewData["ActiveNav"] = "Vocabulary";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">Từ vựng</h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Ôn từ vựng TOEIC theo thuật toán lặp lại ngắt quãng SRS (`UserVocabProgress` - UC-05) — chạm thẻ để lật xem nghĩa và ví dụ.
+        </p>
+    </div>
+    <button type="button" class="tc-db-btn-primary" onclick="alert('Chế độ Flashcard SRS 10 từ đến hạn hôm nay đã sẵn sàng!')">
+        <i class="bi bi-lightning-charge-fill"></i> Ôn 10 từ hôm nay
+    </button>
+</div>
+
+<!-- 3 KPI Stat Cards (Matches Screenshot 4) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3 py-3">
+            <div class="tc-db-stat-icon" style="background: #ECFDF5; color: #059669;">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Đã thuộc (Level 4–5)</div>
+                <div class="tc-db-stat-value">@Model.MasteredCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3 py-3">
+            <div class="tc-db-stat-icon" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-book"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Đang học (Level 1–3)</div>
+                <div class="tc-db-stat-value">@Model.LearningCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex align-items-center gap-3 py-3">
+            <div class="tc-db-stat-icon" style="background: #FFFBEB; color: #D97706;">
+                <i class="bi bi-stars"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Từ mới / Đến hạn SRS</div>
+                <div class="tc-db-stat-value">@Model.NewOrDueCount</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Topic Filter Pills (Matches Screenshot 4) -->
+<div class="d-flex flex-wrap gap-2 mb-4" id="vocabFilters">
+    <button type="button" class="tc-db-filter-pill active" onclick="filterVocabTopic('ALL', this)">Tất cả</button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterVocabTopic('Văn phòng', this)">Văn phòng</button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterVocabTopic('Tài chính', this)">Tài chính</button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterVocabTopic('Logistics', this)">Logistics</button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterVocabTopic('Tuyển dụng', this)">Tuyển dụng</button>
+</div>
+
+<!-- Vocab Flashcards Grid (Matches Screenshot 4) -->
+<div class="row g-3 mb-5" id="vocabGrid">
+    @foreach (var v in Model.VocabItems)
+    {
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2-4 vocab-item" data-topic="@v.TopicName" style="min-width: 215px; flex: 0 0 auto; width: 20%;">
+            <div class="tc-db-vocab-card" onclick="this.querySelector('.vocab-back').classList.toggle('d-none')">
+                <span class="tc-vocab-badge @v.StatusClass">@v.StatusBadge</span>
+                <h5 class="fw-extrabold mb-1" style="color: var(--db-primary); font-size: 1.25rem;">@v.Word</h5>
+                <div class="text-muted small">@v.PartOfSpeech • @v.TopicName</div>
+
+                <div class="vocab-back d-none mt-3 pt-2 border-top">
+                    @if (!string.IsNullOrEmpty(v.Phonetic))
+                    {
+                        <div class="text-muted" style="font-size: 0.75rem;">@v.Phonetic</div>
+                    }
+                    <div class="fw-bold text-dark small mt-1">@v.MeaningVi</div>
+                    @if (!string.IsNullOrEmpty(v.ExampleEn))
+                    {
+                        <div class="text-muted fst-italic mt-1" style="font-size: 0.74rem;">"@v.ExampleEn"</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Mistake Notebook Section (UC-10: Sổ tay lỗi sai & Luyện phục thù) -->
+<div class="tc-db-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h5 class="fw-bold mb-1">
+                <i class="bi bi-journal-x text-danger me-2"></i>Sổ tay lỗi sai (`UserMistake` - UC-10)
+            </h5>
+            <p class="text-muted small mb-0">
+                Các câu hỏi bạn từng làm sai đang ở trạng thái <code>LEARNING</code>. Trả lời đúng liên tiếp để chuyển sang <code>MASTERED</code>!
+            </p>
+        </div>
+        <a asp-controller="Dashboard" asp-action="Practice" class="tc-db-btn-primary">
+            <i class="bi bi-arrow-repeat"></i> Luyện xóa lỗi sai ngay
+        </a>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var m in Model.ActiveMistakes)
+        {
+            <div class="col-md-4">
+                <div class="p-3 rounded-4 border bg-light bg-opacity-50 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger fw-bold">
+                                Sai @m.MistakeCount lần
+                            </span>
+                            <span class="text-muted" style="font-size: 0.75rem;">@m.LastWrongAgo</span>
+                        </div>
+                        <div class="fw-bold text-dark small mb-2">@m.SkillTagName</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">@m.Status</span>
+                        <a asp-controller="Dashboard" asp-action="Practice" class="small fw-bold text-primary text-decoration-none">
+                            Ôn lại <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterVocabTopic(topic, btn) {
+            document.querySelectorAll('#vocabFilters .tc-db-filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('#vocabGrid .vocab-item').forEach(card => {
+                if (topic === 'ALL' || card.getAttribute('data-topic') === topic) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

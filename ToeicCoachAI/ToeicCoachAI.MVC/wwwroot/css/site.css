@@ -1,22 +1,602 @@
-html {
-  font-size: 14px;
+/* ==========================================================================
+   ToeicCoachAI - Global Frontend Design System
+   Bootstrap 5 + Custom Design Tokens
+   ========================================================================== */
+
+:root {
+    /* Brand Colors */
+    --tc-primary: #2536eb;
+    --tc-primary-hover: #1d2bc4;
+    --tc-primary-dark: #17239e;
+    --tc-primary-soft: #eef2ff;
+    --tc-primary-border: #c7d2fe;
+
+    /* Accent & Semantic Colors */
+    --tc-accent: #f59e0b;
+    --tc-accent-soft: #fef3c7;
+    --tc-success: #10b981;
+    --tc-success-soft: #ecfdf5;
+    --tc-success-border: #6ee7b7;
+    --tc-danger: #ef4444;
+    --tc-danger-soft: #fef2f2;
+    --tc-danger-border: #fca5a5;
+
+    /* Backgrounds & Surfaces */
+    --tc-bg-body: #ffffff;
+    --tc-bg-soft: #f4f6fc;
+    --tc-bg-navy: #0f172a;
+    --tc-surface: #ffffff;
+
+    /* Text & Borders */
+    --tc-text-main: #0f172a;
+    --tc-text-secondary: #475569;
+    --tc-text-muted: #64748b;
+    --tc-border: #e2e8f0;
+    --tc-border-light: #eef2f6;
+
+    /* Radii & Shadows */
+    --tc-radius-sm: 0.5rem;
+    --tc-radius-md: 0.75rem;
+    --tc-radius-lg: 1rem;
+    --tc-radius-xl: 1.25rem;
+    --tc-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+    --tc-shadow-md: 0 10px 30px rgba(15, 23, 42, 0.06);
+    --tc-shadow-lg: 0 20px 45px rgba(37, 54, 235, 0.08);
+
+    /* Font Family */
+    --bs-body-font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-@media (min-width: 768px) {
-  html {
+html {
     font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    scroll-behavior: smooth;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: var(--bs-body-font-family);
+    color: var(--tc-text-main);
+    background-color: var(--tc-bg-body);
+    line-height: 1.6;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* ==========================================================================
+   Typography & Utilities
+   ========================================================================== */
+
+.text-tc-primary {
+    color: var(--tc-primary) !important;
+}
+
+.text-tc-secondary {
+    color: var(--tc-text-secondary) !important;
+}
+
+.bg-tc-soft {
+    background-color: var(--tc-bg-soft) !important;
+}
+
+.tc-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tc-primary);
+    margin-bottom: 0.75rem;
+}
+
+.tc-section-title {
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    font-weight: 800;
+    color: var(--tc-text-main);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.tc-hero-title {
+    font-size: clamp(2.15rem, 3.6vw, 3.1rem);
+    font-weight: 800;
+    color: var(--tc-text-main);
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+}
+
+/* ==========================================================================
+   Shared Buttons
+   ========================================================================== */
+
+.btn-tc-primary {
+    background-color: var(--tc-primary);
+    border: 1.5px solid var(--tc-primary);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.65rem 1.35rem;
+    border-radius: var(--tc-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-tc-primary:hover,
+.btn-tc-primary:focus {
+    background-color: var(--tc-primary-hover);
+    border-color: var(--tc-primary-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 54, 235, 0.25);
+}
+
+.btn-tc-outline {
+    background-color: #ffffff;
+    border: 1.5px solid var(--tc-primary);
+    color: var(--tc-primary);
+    font-weight: 600;
+    padding: 0.65rem 1.35rem;
+    border-radius: var(--tc-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-tc-outline:hover,
+.btn-tc-outline:focus {
+    background-color: var(--tc-primary-soft);
+    border-color: var(--tc-primary);
+    color: var(--tc-primary-hover);
+}
+
+.btn-tc-white {
+    background-color: #ffffff;
+    border: 1.5px solid #ffffff;
+    color: var(--tc-primary);
+    font-weight: 700;
+    padding: 0.8rem 1.75rem;
+    border-radius: var(--tc-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-tc-white:hover {
+    background-color: #f8fafc;
+    color: var(--tc-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+
+.tc-navbar {
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--tc-border-light);
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+}
+
+.tc-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--tc-text-main);
+    letter-spacing: -0.02em;
+}
+
+.tc-brand:hover {
+    color: var(--tc-text-main);
+}
+
+.tc-brand-logo {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+}
+
+.tc-brand-toeic {
+    color: #062863;
+}
+
+.tc-brand-coach {
+    color: #0b6efd;
+}
+
+.tc-brand-ai {
+    color: #009394;
+}
+
+.tc-nav-link {
+    color: var(--tc-text-main) !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.15s ease;
+}
+
+.tc-nav-link:hover,
+.tc-nav-link:focus {
+    color: var(--tc-primary) !important;
+}
+
+/* ==========================================================================
+   Hero Section & Mockup Dashboard Card
+   ========================================================================== */
+
+.tc-hero-section {
+    background: linear-gradient(180deg, #f2f5ff 0%, #f8faff 100%);
+    padding: 4.5rem 0 5rem;
+    border-bottom: 1px solid var(--tc-border-light);
+}
+
+.tc-dashboard-card {
+    background: #ffffff;
+    border-radius: var(--tc-radius-xl);
+    box-shadow: var(--tc-shadow-lg);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 1.5rem;
+}
+
+.tc-stat-box {
+    background: #ffffff;
+    border: 1px solid var(--tc-border-light);
+    border-radius: var(--tc-radius-lg);
+    padding: 1rem 1.15rem;
+    height: 100%;
+}
+
+.tc-icon-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.tc-icon-badge-amber {
+    background-color: var(--tc-accent-soft);
+    color: #d97706;
+}
+
+.tc-icon-badge-blue {
+    background-color: var(--tc-primary-soft);
+    color: var(--tc-primary);
+}
+
+.tc-icon-badge-mint {
+    background-color: var(--tc-success-soft);
+    color: var(--tc-success);
+}
+
+.tc-icon-badge-danger {
+    background-color: #ffe4e6;
+    color: var(--tc-danger);
+}
+
+.tc-score-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--tc-text-main);
+    line-height: 1.1;
+}
+
+.tc-delta-badge {
+    display: inline-block;
+    background-color: #d1fae5;
+    color: #065f46;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 0.375rem;
+    line-height: 1.25;
+}
+
+.tc-chart-box {
+    background: #ffffff;
+    border: 1px solid var(--tc-border-light);
+    border-radius: var(--tc-radius-lg);
+    padding: 1rem 1.15rem;
+}
+
+.tc-progress-thin {
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.tc-priority-alert {
+    background-color: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: var(--tc-radius-md);
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s ease;
+}
+
+.tc-priority-alert:hover {
+    background-color: #ffe4e6;
+}
+
+/* ==========================================================================
+   Feature Pillars & How It Works (4 Steps)
+   ========================================================================== */
+
+.tc-feature-icon-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+@media (min-width: 992px) {
+    .tc-pillar-divider {
+        border-right: 1px solid var(--tc-border-light);
+    }
+}
+
+.tc-steps-wrapper {
+    position: relative;
+}
+
+@media (min-width: 992px) {
+    .tc-steps-wrapper::before {
+        content: "";
+        position: absolute;
+        top: 55%;
+        left: 10%;
+        right: 10%;
+        border-top: 2px dashed #cbd5e1;
+        z-index: 0;
+    }
+}
+
+.tc-step-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border: 1px solid var(--tc-border-light);
+    border-radius: var(--tc-radius-lg);
+    padding: 2rem 1.35rem 1.65rem;
+    box-shadow: var(--tc-shadow-md);
+    height: 100%;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.tc-step-card:hover {
+    transform: translateY(-4px);
+}
+
+.tc-step-number {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--tc-primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(37, 54, 235, 0.3);
+}
+
+/* ==========================================================================
+   AI Explanation Showcase Card
+   ========================================================================== */
+
+.tc-explain-card {
+    background: #ffffff;
+    border-radius: var(--tc-radius-xl);
+    border: 1px solid var(--tc-border-light);
+    box-shadow: var(--tc-shadow-md);
+    padding: 2rem;
+}
+
+.tc-option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-radius: var(--tc-radius-sm);
+    border: 1px solid var(--tc-border);
+    margin-bottom: 0.65rem;
+    font-size: 0.95rem;
+    background: #ffffff;
+}
+
+.tc-option-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-right: 0.75rem;
+    border: 1px solid var(--tc-border);
+    color: var(--tc-text-secondary);
+    background: #f8fafc;
+}
+
+.tc-option-wrong {
+    background-color: var(--tc-danger-soft);
+    border-color: var(--tc-danger-border);
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.tc-option-wrong .tc-option-letter {
+    background-color: #ffffff;
+    border-color: var(--tc-danger-border);
+    color: var(--tc-danger);
+}
+
+.tc-option-correct {
+    background-color: var(--tc-success-soft);
+    border-color: var(--tc-success-border);
+    color: #047857;
+    font-weight: 600;
+}
+
+.tc-option-correct .tc-option-letter {
+    background-color: var(--tc-success);
+    border-color: var(--tc-success);
+    color: #ffffff;
+}
+
+.tc-knowledge-box {
+    background-color: var(--tc-primary-soft);
+    border-radius: var(--tc-radius-sm);
+    padding: 0.9rem 1rem;
+}
+
+.tc-drill-box {
+    background-color: #d1fae5;
+    border-radius: var(--tc-radius-sm);
+    padding: 0.9rem 1rem;
+    text-decoration: none;
+    color: var(--tc-text-main);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.15s ease;
+}
+
+.tc-drill-box:hover {
+    background-color: #a7f3d0;
+    color: var(--tc-text-main);
+}
+
+/* ==========================================================================
+   FAQ Accordion & Bottom CTA Banner
+   ========================================================================== */
+
+.tc-faq-accordion .accordion-item {
+    border: 1px solid var(--tc-border-light);
+    border-radius: var(--tc-radius-md) !important;
+    margin-bottom: 0.85rem;
+    overflow: hidden;
+    box-shadow: var(--tc-shadow-sm);
+}
+
+.tc-faq-accordion .accordion-button {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--tc-text-main);
+    padding: 1.15rem 1.35rem;
+    background-color: #ffffff;
+    box-shadow: none !important;
+}
+
+.tc-faq-accordion .accordion-button:not(.collapsed) {
+    color: var(--tc-primary);
+    background-color: #f4f6ff;
+}
+
+.tc-faq-accordion .accordion-body {
+    color: var(--tc-text-secondary);
+    font-size: 0.94rem;
+    padding: 1rem 1.35rem 1.25rem;
+    background-color: #ffffff;
+}
+
+.tc-cta-banner {
+    position: relative;
+    background: linear-gradient(135deg, #1d2ec7 0%, #2536eb 100%);
+    border-radius: 1.35rem;
+    padding: 3.75rem 2rem;
+    color: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 20px 45px rgba(37, 54, 235, 0.22);
+}
+
+.tc-cta-sun {
+    position: absolute;
+    left: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 22px rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.tc-cta-mountains {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    height: 180px;
+    pointer-events: none;
+    opacity: 0.25;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.tc-footer {
+    background-color: var(--tc-bg-navy);
+    color: #94a3b8;
+    padding: 4rem 0 2rem;
+    font-size: 0.9rem;
+}
+
+.tc-footer-heading {
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 1.1rem;
+}
+
+.tc-footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tc-footer-links li {
+    margin-bottom: 0.65rem;
+}
+
+.tc-footer-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.tc-footer-links a:hover {
+    color: #ffffff;
+}
+
+.tc-footer-bottom {
+    border-top: 1px solid rgba(148, 163, 184, 0.15);
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    font-size: 0.82rem;
+    color: #64748b;
 }

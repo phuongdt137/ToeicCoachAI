@@ -1,0 +1,252 @@
+@using ToeicCoachAI.Model.Enums
+@model ToeicCoachAI.Model.DTOs.Admin.SkillTagManagementPageDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Nhãn Kỹ năng & Luật Sinh đề AI";
+    ViewData["ActiveNav"] = "SkillTags";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">
+            Nhãn Kỹ năng &amp; Luật Sinh đề AI (`SkillTag` - UC-16)
+        </h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Quản lý cây danh mục kỹ năng TOEIC, ngưỡng tồn kho tối thiểu (`MinPoolThreshold`) và chỉ dẫn Prompt (`AiGenerationRules`) cho OpenAI Generator.
+        </p>
+    </div>
+    <button type="button" class="tc-db-btn-primary" onclick="openSkillTagModal()">
+        <i class="bi bi-plus-lg"></i> Thêm Nhãn Kỹ năng mới
+    </button>
+</div>
+
+<!-- Category Filter Pills -->
+<div class="d-flex flex-wrap gap-2 mb-4" id="tagCategoryFilters">
+    <button type="button" class="tc-db-filter-pill active" onclick="filterTagCategory('ALL', this)">
+        Tất cả (@Model.SkillTags.Count)
+    </button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterTagCategory('PART_SKILL', this)">
+        Kỹ năng theo Part (PART_SKILL)
+    </button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterTagCategory('GRAMMAR', this)">
+        Chủ điểm Ngữ pháp (GRAMMAR)
+    </button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterTagCategory('WRITING_SKILL', this)">
+        Kỹ năng Viết (WRITING_SKILL)
+    </button>
+    <button type="button" class="tc-db-filter-pill" onclick="filterTagCategory('VOCAB_TOPIC', this)">
+        Chủ đề Từ vựng (VOCAB_TOPIC)
+    </button>
+</div>
+
+<!-- SkillTags Table Card -->
+<div class="tc-db-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0 small" id="skillTagsTable">
+            <thead class="table-light">
+                <tr>
+                    <th style="min-width: 220px;">Mã &amp; Tên Nhãn Kỹ năng</th>
+                    <th>Phân loại (`Category`)</th>
+                    <th class="text-center">Ngưỡng tối thiểu (`MinPoolThreshold`)</th>
+                    <th class="text-center">Hiện có (`PUBLISHED`)</th>
+                    <th style="min-width: 320px;">Luật Sinh đề AI (`AiGenerationRules`)</th>
+                    <th class="text-end" style="min-width: 130px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tag in Model.SkillTags)
+                {
+                    <tr class="skill-tag-row" data-category="@tag.Category">
+                        <td>
+                            <div class="fw-bold text-dark">@tag.Name</div>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <code class="px-2 py-0 rounded bg-light border text-primary">@tag.Code</code>
+                                @if (!string.IsNullOrEmpty(tag.ParentName))
+                                {
+                                    <span class="text-muted" style="font-size: 0.72rem;">Cha: @tag.ParentName</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-light text-dark border fw-semibold">@tag.Category</span>
+                        </td>
+                        <td class="text-center fw-bold">
+                            @tag.MinPoolThreshold câu
+                        </td>
+                        <td class="text-center">
+                            @if (tag.Category == SkillCategory.VOCAB_TOPIC)
+                            {
+                                <span class="badge bg-info bg-opacity-10 text-primary border">@tag.VocabCount từ vựng</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill @(tag.IsLowInventory ? "bg-warning text-dark" : "bg-success")">
+                                    @tag.PublishedQuestionCount / @tag.MinPoolThreshold
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(tag.AiGenerationRules))
+                            {
+                                <div class="p-2 rounded-3 bg-light border text-secondary" style="font-size: 0.78rem; line-height: 1.45;">
+                                    <i class="bi bi-robot text-primary me-1"></i>@tag.AiGenerationRules
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">Chưa thiết lập luật sinh đề riêng</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-3"
+                                        title="Chỉnh sửa Nhãn & Luật AI"
+                                        data-id="@tag.Id"
+                                        data-code="@tag.Code"
+                                        data-name="@tag.Name"
+                                        data-category="@tag.Category"
+                                        data-parent="@tag.ParentId"
+                                        data-threshold="@tag.MinPoolThreshold"
+                                        data-rules="@tag.AiGenerationRules"
+                                        onclick="editSkillTagFromBtn(this)">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </button>
+
+                                <form asp-controller="Admin" asp-action="DeleteSkillTag" method="post"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhãn kỹ năng này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@tag.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Xóa nhãn">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create / Edit SkillTag Modal -->
+<div class="modal fade" id="skillTagModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <form asp-controller="Admin" asp-action="SaveSkillTag" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="modalTagId" />
+
+                <div class="modal-header border-bottom px-4 py-3">
+                    <h5 class="modal-title fw-extrabold" id="skillTagModalTitle">Thêm Nhãn Kỹ năng mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold">Mã kỹ năng (`Code`) <span class="text-danger">*</span></label>
+                            <input type="text" name="Code" id="modalTagCode" class="form-control" placeholder="VD: PART5_CONDITIONAL" required maxlength="100" />
+                            <div class="form-text" style="font-size: 0.74rem;">Viết hoa, không dấu, nối bằng dấu gạch dưới.</div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label small fw-bold">Tên hiển thị (`Name`) <span class="text-danger">*</span></label>
+                            <input type="text" name="Name" id="modalTagName" class="form-control" placeholder="VD: Part 5: Câu điều kiện (Conditionals)" required maxlength="255" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Phân loại (`Category`)</label>
+                            <select name="Category" id="modalTagCategory" class="form-select">
+                                <option value="PART_SKILL">PART_SKILL (Kỹ năng theo Part)</option>
+                                <option value="GRAMMAR">GRAMMAR (Chủ điểm Ngữ pháp)</option>
+                                <option value="WRITING_SKILL">WRITING_SKILL (Kỹ năng Viết)</option>
+                                <option value="VOCAB_TOPIC">VOCAB_TOPIC (Chủ đề Từ vựng)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Nhãn cha (`ParentId` - Tùy chọn)</label>
+                            <select name="ParentId" id="modalTagParent" class="form-select">
+                                <option value="">-- Không có (Nhãn gốc) --</option>
+                                @foreach (var p in Model.SkillTags)
+                                {
+                                    <option value="@p.Id">@p.Code - @p.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Ngưỡng câu hỏi tối thiểu (`MinPoolThreshold`)</label>
+                            <input type="number" name="MinPoolThreshold" id="modalTagThreshold" class="form-control" value="50" min="1" max="5000" required />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">
+                                <i class="bi bi-robot text-primary me-1"></i>Luật Sinh đề cho AI Generator (`AiGenerationRules`)
+                            </label>
+                            <textarea name="AiGenerationRules" id="modalTagRules" class="form-control" rows="4"
+                                      placeholder="Mô tả chi tiết cấu trúc câu hỏi, loại bẫy ETS (distractor traps), bối cảnh thương mại, hoặc yêu cầu ImagePrompt / TranscriptData..."></textarea>
+                            <div class="form-text" style="font-size: 0.75rem;">
+                                OpenAI Generator (`gpt-4o-mini`) sẽ đọc trực tiếp chỉ dẫn này mỗi khi tạo câu hỏi mới cho nhãn kỹ năng này.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top px-4 py-3">
+                    <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="tc-db-btn-primary">
+                        <i class="bi bi-check2-circle"></i> Lưu Nhãn Kỹ năng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTagCategory(cat, btn) {
+            document.querySelectorAll('#tagCategoryFilters .tc-db-filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            document.querySelectorAll('#skillTagsTable .skill-tag-row').forEach(row => {
+                if (cat === 'ALL' || row.getAttribute('data-category') === cat) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function openSkillTagModal() {
+            document.getElementById('skillTagModalTitle').innerText = 'Thêm Nhãn Kỹ năng mới';
+            document.getElementById('modalTagId').value = '';
+            document.getElementById('modalTagCode').value = '';
+            document.getElementById('modalTagName').value = '';
+            document.getElementById('modalTagCategory').value = 'PART_SKILL';
+            document.getElementById('modalTagParent').value = '';
+            document.getElementById('modalTagThreshold').value = '50';
+            document.getElementById('modalTagRules').value = '';
+
+            var modal = new bootstrap.Modal(document.getElementById('skillTagModal'));
+            modal.show();
+        }
+
+        function editSkillTagFromBtn(btn) {
+            document.getElementById('skillTagModalTitle').innerText = 'Cập nhật Nhãn Kỹ năng & Luật Sinh đề AI';
+            document.getElementById('modalTagId').value = btn.getAttribute('data-id') || '';
+            document.getElementById('modalTagCode').value = btn.getAttribute('data-code') || '';
+            document.getElementById('modalTagName').value = btn.getAttribute('data-name') || '';
+            document.getElementById('modalTagCategory').value = btn.getAttribute('data-category') || 'PART_SKILL';
+            document.getElementById('modalTagParent').value = btn.getAttribute('data-parent') || '';
+            document.getElementById('modalTagThreshold').value = btn.getAttribute('data-threshold') || '50';
+            document.getElementById('modalTagRules').value = btn.getAttribute('data-rules') || '';
+
+            var modal = new bootstrap.Modal(document.getElementById('skillTagModal'));
+            modal.show();
+        }
+    </script>
+}

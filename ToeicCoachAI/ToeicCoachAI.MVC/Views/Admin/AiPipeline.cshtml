@@ -1,0 +1,322 @@
+@model ToeicCoachAI.Model.DTOs.Admin.AiPipelinePageDto
+@using ToeicCoachAI.Model.Enums
+@{
+    ViewData["Title"] = "AI Tạo & Kiểm định Đề thi (Dual-Model Pipeline)";
+    ViewData["ActiveNav"] = "AiPipeline";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Header -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">
+                <i class="bi bi-cpu-fill me-1"></i>UC-17 &amp; UC-18: DUAL-MODEL AI PIPELINE
+            </span>
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0;">
+                <i class="bi bi-cloud-check-fill me-1"></i>0 Bytes Local Disk (100% Cloud URL)
+            </span>
+        </div>
+        <h3 class="fw-extrabold mb-1" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A;">
+            AI Tạo đề Đa phương tiện &amp; Kiểm định Độc lập (Blind Validation)
+        </h3>
+        <p class="text-muted small mb-0">
+            Generator AI (<code>@Model.GeneratorModel</code>) sinh đề + Tranh Flux Cloud CDN + Audio Multi-Voice TTS &rarr; Validator AI (<code>@Model.ValidatorModel</code>) giải mù (Blind Solve) &rarr; Khớp 100% tự động <code>PUBLISHED</code>, lệch đẩy vào <code>QUARANTINED</code>.
+        </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Admin" asp-action="Quarantine" class="btn btn-outline-warning rounded-pill px-3 fw-semibold small">
+            <i class="bi bi-shield-exclamation me-1"></i>Khu cách ly Quarantine
+        </a>
+        <a href="/hangfire" target="_blank" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold small">
+            <i class="bi bi-clock-history me-1"></i>Hangfire Cron (02:00 AM)
+        </a>
+    </div>
+</div>
+
+<!-- Pipeline Architecture Flow Banner -->
+<div class="tc-db-panel p-3 mb-4 border-0" style="background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%); color: #fff; border-radius: 16px;">
+    <div class="row g-3 align-items-center text-center text-md-start">
+        <div class="col-md-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-1-circle-fill fs-5"></i></span>
+                <div>
+                    <div class="fw-bold small text-info">BƯỚC 1: LUẬT SKILLTAG</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">Đọc JSON <code>AiGenerationRules</code> &amp; từ vựng bắt buộc</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-2-circle-fill fs-5"></i></span>
+                <div>
+                    <div class="fw-bold small text-info">BƯỚC 2: GENERATOR + MEDIA CDN</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">Sinh câu hỏi + Tranh Flux CDN + Audio TTS Cloud</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-3-circle-fill fs-5"></i></span>
+                <div>
+                    <div class="fw-bold small text-info">BƯỚC 3: BLIND VALIDATOR AI</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">Che đáp án gốc, giải độc lập &amp; chấm ETS Score</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-success rounded-circle p-2"><i class="bi bi-4-circle-fill fs-5"></i></span>
+                <div>
+                    <div class="fw-bold small text-warning">BƯỚC 4: PHÂN LOẠI TỰ ĐỘNG</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">APPROVED &rarr; <code>PUBLISHED</code> | Lệch &rarr; <code>QUARANTINED</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Left Column: Trigger Manual AI Generation Form -->
+    <div class="col-lg-5">
+        <div class="tc-db-panel p-4 h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-rocket-takeoff-fill text-primary me-2"></i>Kích hoạt AI Sinh đề (Manual Trigger)
+                </h5>
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 small">ADMIN_MANUAL</span>
+            </div>
+
+            <form asp-controller="Admin" asp-action="TriggerAiJob" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-dark">1. Chọn Nhãn Kỹ năng (SkillTag) cần bơm đề <span class="text-danger">*</span></label>
+                    <select name="TargetSkillTagId" id="pipelineSkillTagSelect" class="form-select rounded-3" required onchange="updateSelectedSkillTagHint(this)">
+                        @foreach (var tag in Model.EligibleSkillTags)
+                        {
+                            <option value="@tag.Id"
+                                    data-category="@tag.Category"
+                                    data-rules="@tag.AiGenerationRules">
+                                [@tag.Category] @tag.Code - @tag.Name (Published: @tag.PublishedQuestionCount/@tag.MinPoolThreshold)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold small text-dark">2. Số lượng cụm đề (1 - 20)</label>
+                        <input type="number" name="RequestedCount" class="form-control rounded-3 fw-bold" min="1" max="20" value="3" required />
+                        <div class="form-text" style="font-size: 0.72rem;">Mỗi cụm đề tự động sinh kèm Tranh/Audio theo Part.</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold small text-dark">3. Mức độ khó mục tiêu</label>
+                        <select name="TargetDifficulty" class="form-select rounded-3">
+                            <option value="@TargetDifficulty.EASY">EASY (Foundation 0 - 450)</option>
+                            <option value="@TargetDifficulty.MEDIUM" selected>MEDIUM (Intermediate 500 - 700+)</option>
+                            <option value="@TargetDifficulty.HARD">HARD (Advanced 750 - 990)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Media Auto-Detection Box -->
+                <div class="p-3 rounded-3 mb-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold small text-dark"><i class="bi bi-magic text-primary me-1"></i>Đa phương tiện Cloud CDN:</span>
+                        <span class="badge bg-info-subtle text-info-emphasis" id="partBadgePreview">Tự động theo SkillTag</span>
+                    </div>
+                    <div class="small text-secondary mb-2">
+                        Tự động sinh <strong>Tranh AI (Flux Realism CDN)</strong> cho Part 1 / Writing Q1-5 &amp; <strong>Audio TTS Đa giọng đọc</strong> cho Listening Part 1–4. Lưu trữ 100% bằng Cloud URL.
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-muted fw-semibold" style="font-size: 0.72rem;">Luật AI (AiGenerationRules) đang áp dụng:</div>
+                        <pre id="rulesPreviewBox" class="mb-0 mt-1 p-2 rounded bg-white border text-secondary" style="font-size: 0.72rem; max-height: 110px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>Chạy Pipeline Sinh đề &amp; Kiểm định Mù Ngay
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Recent Jobs & Blind Validation Logs -->
+    <div class="col-lg-7">
+        <div class="tc-db-panel p-4 h-100">
+            <ul class="nav nav-pills mb-3 gap-2" id="pipelineTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-3 py-1 small fw-bold" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobsPane" type="button" role="tab">
+                        <i class="bi bi-cpu me-1"></i>Lịch sử Tiến trình AI (@Model.Jobs.Count)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-3 py-1 small fw-bold" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logsPane" type="button" role="tab">
+                        <i class="bi bi-shield-check me-1"></i>Nhật ký Blind Validator (@Model.RecentValidationLogs.Count)
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Tab 1: Recent Jobs -->
+                <div class="tab-pane fade show active" id="jobsPane" role="tabpanel">
+                    <div class="table-responsive" style="max-height: 430px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>SkillTag</th>
+                                    <th>Nguồn</th>
+                                    <th class="text-center">Yêu cầu</th>
+                                    <th class="text-center">Published</th>
+                                    <th class="text-center">Quarantine</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.Jobs.Any())
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">Chưa có tiến trình AI nào được ghi nhận.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var job in Model.Jobs)
+                                    {
+                                        <tr>
+                                            <td class="text-muted" style="font-size: 0.75rem;">
+                                                @job.StartedAt.ToLocalTime().ToString("dd/MM HH:mm:ss")
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark">@job.SkillTagCode</div>
+                                                <div class="text-muted" style="font-size: 0.72rem;">@job.SkillTagName</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill @(job.TriggerType == "ADMIN_MANUAL" ? "bg-primary-subtle text-primary" : "bg-secondary-subtle text-secondary")">
+                                                    @job.TriggerType
+                                                </span>
+                                            </td>
+                                            <td class="text-center fw-bold">@job.RequestedCount</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success-subtle text-success fw-bold px-2">@job.PublishedCount</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if (job.QuarantinedCount > 0)
+                                                {
+                                                    <a asp-controller="Admin" asp-action="Quarantine" class="badge bg-warning-subtle text-warning-emphasis fw-bold px-2 text-decoration-none">
+                                                        @job.QuarantinedCount <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">0</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (job.Status == "COMPLETED")
+                                                {
+                                                    <span class="badge bg-success text-white rounded-pill">COMPLETED</span>
+                                                }
+                                                else if (job.Status == "FAILED")
+                                                {
+                                                    <span class="badge bg-danger text-white rounded-pill">FAILED</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info text-dark rounded-pill">@job.Status</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Blind Validation Logs -->
+                <div class="tab-pane fade" id="logsPane" role="tabpanel">
+                    <div class="table-responsive" style="max-height: 430px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Part / Kỹ năng</th>
+                                    <th>Model</th>
+                                    <th class="text-center">Điểm ETS</th>
+                                    <th>Quyết định</th>
+                                    <th>Nhận xét của Blind Validator</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.RecentValidationLogs.Any())
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">Chưa có nhật ký kiểm định mù nào.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var log in Model.RecentValidationLogs)
+                                    {
+                                        <tr>
+                                            <td class="text-muted" style="font-size: 0.74rem;">
+                                                @log.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border">Part @log.PartNumber</span>
+                                                <div class="fw-bold text-primary" style="font-size: 0.75rem;">@log.SkillType</div>
+                                            </td>
+                                            <td><code>@log.ValidatorModel</code></td>
+                                            <td class="text-center">
+                                                <span class="fw-bold @(log.EtsComplianceScore >= 80 ? "text-success" : "text-warning")">
+                                                    @log.EtsComplianceScore%
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (log.IsAnswerMatched && log.FinalDecision == "APPROVED")
+                                                {
+                                                    <span class="badge bg-success-subtle text-success rounded-pill">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>APPROVED
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-controller="Admin" asp-action="Quarantine" class="badge bg-warning-subtle text-warning-emphasis rounded-pill text-decoration-none">
+                                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>QUARANTINED
+                                                    </a>
+                                                }
+                                            </td>
+                                            <td class="text-muted" style="max-width: 240px; font-size: 0.74rem;">
+                                                @(string.IsNullOrWhiteSpace(log.RejectionReasons) ? "Khớp 100% đáp án giữa Generator và Blind Validator." : log.RejectionReasons)
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateSelectedSkillTagHint(selectEl) {
+            const opt = selectEl.options[selectEl.selectedIndex];
+            if (!opt) return;
+            const cat = opt.getAttribute('data-category') || '';
+            const rules = opt.getAttribute('data-rules') || '{}';
+            document.getElementById('partBadgePreview').textContent = cat;
+            document.getElementById('rulesPreviewBox').textContent = rules;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectEl = document.getElementById('pipelineSkillTagSelect');
+            if (selectEl) updateSelectedSkillTagHint(selectEl);
+        });
+    </script>
+}

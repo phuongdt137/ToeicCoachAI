@@ -1,0 +1,219 @@
+@model ToeicCoachAI.Model.DTOs.Dashboard.TestHubPageDto
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Bài kiểm tra & Thi thử";
+    ViewData["ActiveNav"] = "Tests";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">Bài kiểm tra</h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Đánh giá năng lực chẩn đoán, thi thử chuẩn cấu trúc đề (`MockTestBlueprint`) và theo dõi sự tiến bộ của bạn.
+        </p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Progress" class="tc-db-btn-outline">
+        <i class="bi bi-bar-chart-line"></i> Xem tất cả kết quả
+    </a>
+</div>
+
+<!-- Hero Recommended Test Banner (Matches Screenshot 3) -->
+<div class="tc-db-hero-card mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="tc-db-hero-badge mb-2 bg-white border">
+                <i class="bi bi-stars text-primary"></i> Được đề xuất
+            </span>
+            <h3 class="fw-extrabold text-dark mt-1 mb-2" style="font-size: 1.65rem;">
+                Kiểm tra tiến độ tuần 3
+            </h3>
+            <p class="text-muted mb-3" style="font-size: 0.92rem;">
+                Đánh giá lại các kỹ năng đã học và cập nhật điểm thành thạo `UserSkillProficiency` cá nhân hóa.
+            </p>
+            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small mb-3">
+                <span><i class="bi bi-file-earmark-text me-1"></i>30 câu hỏi</span>
+                <span><i class="bi bi-clock me-1"></i>35 phút</span>
+                <span><i class="bi bi-bar-chart me-1"></i>Listening &amp; Reading</span>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <a href="#blueprint-list" class="tc-db-btn-primary">
+                    Bắt đầu kiểm tra <i class="bi bi-arrow-right"></i>
+                </a>
+                <a asp-controller="Dashboard" asp-action="Progress" class="text-decoration-underline fw-bold small" style="color: var(--db-primary);">
+                    Xem nội dung kiểm tra?
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-5 d-flex flex-column align-items-lg-end align-items-start">
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-center">
+                    <div class="tc-ring-box">
+                        <svg width="108" height="108" viewBox="0 0 108 108">
+                            <circle cx="54" cy="54" r="44" fill="none" stroke="#DCE3FF" stroke-width="10" />
+                            <circle cx="54" cy="54" r="44" fill="none" stroke="#3B5BDB" stroke-width="10"
+                                    stroke-dasharray="276" stroke-dashoffset="95" stroke-linecap="round"
+                                    transform="rotate(-90 54 54)" />
+                        </svg>
+                        <div class="position-absolute text-center">
+                            <div class="text-muted" style="font-size: 0.65rem;">Điểm gần nhất</div>
+                            <div class="fw-extrabold fs-4 text-dark lh-1">@Model.Summary.TotalEstimatedLR</div>
+                        </div>
+                    </div>
+                </div>
+
+                <i class="bi bi-arrow-right text-primary fs-5"></i>
+
+                <div class="bg-white rounded-4 p-3 shadow-sm border text-center" style="min-width: 118px;">
+                    <div class="text-warning mb-1"><i class="bi bi-bullseye fs-5"></i></div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Mục tiêu</div>
+                    <div class="fw-extrabold fs-4 text-dark">@Model.Summary.TotalTargetLR</div>
+                </div>
+            </div>
+            <div class="small text-muted mt-2">
+                <i class="bi bi-book me-1"></i>Cập nhật lộ trình sau khi hoàn thành
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3 Test Type Cards (Matches Screenshot 3) -->
+<h5 class="fw-bold mb-3">Chọn loại bài kiểm tra</h5>
+<div class="row g-3 mb-4">
+    <!-- Card 1: Placement Test -->
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex flex-column">
+            <div class="tc-db-stat-icon mb-3" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-bullseye"></i>
+            </div>
+            <span class="badge rounded-pill mb-2 align-self-start" style="background: #ECFDF5; color: #059669; font-weight: 700;">
+                Nên làm lần đầu (PLACEMENT_TEST)
+            </span>
+            <h5 class="fw-extrabold text-dark mb-1">Kiểm tra chẩn đoán</h5>
+            <p class="text-muted small mb-3">
+                Xác định trình độ hiện tại, quy đổi điểm ước tính và lập bản đồ lỗ hổng kiến thức.
+            </p>
+            <div class="d-flex align-items-center gap-3 text-muted small mt-auto mb-3">
+                <span><i class="bi bi-file-earmark-text me-1"></i>40–60 câu</span>
+                <span><i class="bi bi-clock me-1"></i>35–60 phút</span>
+            </div>
+            <a href="#blueprint-list" class="tc-db-btn-outline w-100">Bắt đầu</a>
+        </div>
+    </div>
+
+    <!-- Card 2: Full / Mini Mock Test (Highlighted Blue Border like Screenshot 3) -->
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex flex-column" style="border: 2px solid #3B5BDB;">
+            <div class="tc-db-stat-icon mb-3" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <span class="badge rounded-pill mb-2 align-self-start" style="background: #FFFBEB; color: #D97706; font-weight: 700;">
+                Chuẩn format TOEIC (MOCK_TEST)
+            </span>
+            <h5 class="fw-extrabold text-dark mb-1">Thi thử TOEIC</h5>
+            <p class="text-muted small mb-3">
+                Mô phỏng đầy đủ bài thi Listening &amp; Reading theo bộ khung `MockTestBlueprint`.
+            </p>
+            <div class="d-flex align-items-center gap-3 text-muted small mt-auto mb-3">
+                <span><i class="bi bi-file-earmark-text me-1"></i>100–200 câu</span>
+                <span><i class="bi bi-clock me-1"></i>60–120 phút</span>
+            </div>
+            <a href="#blueprint-list" class="tc-db-btn-primary w-100">Chọn đề thi</a>
+        </div>
+    </div>
+
+    <!-- Card 3: Smart Practice by Part -->
+    <div class="col-md-4">
+        <div class="tc-db-card d-flex flex-column">
+            <div class="tc-db-stat-icon mb-3" style="background: #EEF2FF; color: #3B5BDB;">
+                <i class="bi bi-grid"></i>
+            </div>
+            <span class="badge rounded-pill mb-2 align-self-start bg-light text-secondary border fw-bold">
+                Linh hoạt (SMART_PRACTICE)
+            </span>
+            <h5 class="fw-extrabold text-dark mb-1">Kiểm tra theo Part</h5>
+            <p class="text-muted small mb-3">
+                Đánh giá riêng từng Part từ 1 đến 7 hoặc tự chọn chủ đề ngữ pháp yếu.
+            </p>
+            <div class="d-flex align-items-center gap-3 text-muted small mt-auto mb-3">
+                <span><i class="bi bi-file-earmark-text me-1"></i>10–40 câu</span>
+                <span><i class="bi bi-clock me-1"></i>Tùy chọn</span>
+            </div>
+            <a asp-controller="Dashboard" asp-action="Practice" class="tc-db-btn-outline w-100">Chọn Part</a>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom 2 Columns: MockTestBlueprints List + Recent PracticeSessions -->
+<div class="row g-3" id="blueprint-list">
+    <div class="col-lg-7">
+        <div class="tc-db-card">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h6 class="fw-bold mb-0">Đề thi thử (`MockTestBlueprint`)</h6>
+                <div class="d-flex gap-1">
+                    <span class="tc-db-filter-pill active py-1 px-2" style="font-size: 0.76rem;">Tất cả</span>
+                    <span class="tc-db-filter-pill py-1 px-2" style="font-size: 0.76rem;">Chưa làm</span>
+                    <span class="tc-db-filter-pill py-1 px-2" style="font-size: 0.76rem;">Đã hoàn thành</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                @foreach (var bp in Model.Blueprints)
+                {
+                    <div class="d-flex flex-wrap align-items-center justify-content-between p-3 rounded-4 border bg-light bg-opacity-50 gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="tc-db-stat-icon" style="background: #EEF2FF; color: #3B5BDB; width: 40px; height: 40px;">
+                                <i class="bi bi-file-earmark-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark small">@bp.Title</div>
+                                <div class="text-muted" style="font-size: 0.78rem;">
+                                    @bp.QuestionCount câu • @bp.DurationMinutes phút • <span class="text-primary fw-semibold">@bp.TestType</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-pill" style="background: #ECFDF5; color: #059669;">Mới</span>
+                            <a href="#" class="tc-db-btn-primary py-1 px-3" style="font-size: 0.8rem;">Làm bài</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="tc-db-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-clock-history text-primary me-1"></i>Kết quả gần đây
+                </h6>
+                <span class="badge rounded-pill" style="background: #ECFDF5; color: #059669;">
+                    <i class="bi bi-graph-up-arrow me-1"></i>+65 điểm từ lần đầu
+                </span>
+            </div>
+
+            <div class="d-flex flex-column gap-2">
+                @foreach (var s in Model.RecentSessions)
+                {
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-4 border">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="tc-db-stat-icon" style="background: #F3F4F6; color: #374151; width: 38px; height: 38px; font-size: 0.95rem;">
+                                <i class="bi bi-journal-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark small">@s.Title</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">Chế độ: @s.Mode</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-extrabold text-primary">@s.TotalScore/@s.MaxScore</div>
+                            <div class="text-muted" style="font-size: 0.73rem;">@s.TimeAgo</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

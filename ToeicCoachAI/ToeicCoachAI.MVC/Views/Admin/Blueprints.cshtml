@@ -1,0 +1,150 @@
+@model ToeicCoachAI.Model.DTOs.Admin.BlueprintManagementPageDto
+@using ToeicCoachAI.Model.Enums
+@{
+    ViewData["Title"] = "Quản lý Khung Đề thi (Mock Test Blueprints)";
+    ViewData["ActiveNav"] = "Blueprints";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Header -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE;">
+                <i class="bi bi-journal-bookmark-fill me-1"></i>UC-21: MOCK TEST BLUEPRINTS
+            </span>
+            <span class="badge rounded-pill bg-success-subtle text-success fw-bold px-3 py-1">
+                Kho đề sẵn sàng: @Model.AvailablePublishedGroupsCount cụm PUBLISHED
+            </span>
+        </div>
+        <h3 class="fw-extrabold mb-1" style="font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A;">
+            Đóng gói Khung Đề thi Chuẩn &amp; Bốc đề Tự động (Blueprints)
+        </h3>
+        <p class="text-muted small mb-0">
+            Cấu hình đề thi Đầu vào (Placement / Diagnostic Test) hoặc Full Mock Test ETS. Hệ thống tự động bốc các cụm câu hỏi <code>PUBLISHED</code> từ Ngân hàng Đề vào Khung Đề thi chỉ với 1 cú click.
+        </p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                data-bs-toggle="modal" data-bs-target="#createBlueprintModal">
+            <i class="bi bi-plus-lg me-1"></i>Tạo Khung Đề thi Mới
+        </button>
+    </div>
+</div>
+
+<!-- Blueprints Grid -->
+<div class="row g-4">
+    @if (!Model.Blueprints.Any())
+    {
+        <div class="col-12">
+            <div class="tc-db-panel p-5 text-center">
+                <i class="bi bi-journal-x fs-1 text-muted mb-2 d-block"></i>
+                <h5 class="fw-bold">Chưa có Khung Đề thi (MockTestBlueprint) nào</h5>
+                <p class="text-muted small">Hãy tạo Khung Đề thi mới và bấm "Tự động Bốc câu hỏi từ Kho PUBLISHED".</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var bp in Model.Blueprints)
+        {
+            <div class="col-lg-6">
+                <div class="tc-db-panel p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @(bp.IsActive ? "bg-success" : "bg-secondary") rounded-pill">
+                                    @(bp.IsActive ? "Đang mở thi (Active)" : "Tạm ẩn")
+                                </span>
+                                <span class="badge bg-primary-subtle text-primary fw-bold">@bp.TestType</span>
+                            </div>
+                            <span class="text-muted small">
+                                <i class="bi bi-clock-history me-1"></i>@bp.DurationMinutes phút
+                            </span>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3">@bp.Title</h5>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="p-2 rounded-3 bg-light border text-center">
+                                    <div class="text-muted" style="font-size: 0.72rem;">Thời lượng làm bài</div>
+                                    <div class="fw-extrabold fs-5 text-dark">@bp.DurationMinutes phút</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded-3 bg-light border text-center">
+                                    <div class="text-muted" style="font-size: 0.72rem;">Đã gán từ kho PUBLISHED</div>
+                                    <div class="fw-extrabold fs-5 @(bp.GroupCount > 0 ? "text-success" : "text-warning")">
+                                        @bp.GroupCount cụm đề
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-3 border-top">
+                        <form asp-controller="Admin" asp-action="AutoAssembleBlueprint" method="post" class="flex-grow-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="blueprintId" value="@bp.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-bold">
+                                <i class="bi bi-magic me-1"></i>Tự động Bốc &amp; Đóng gói Câu hỏi từ Kho PUBLISHED
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Modal Create Blueprint -->
+<div class="modal fade" id="createBlueprintModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <form asp-controller="Admin" asp-action="SaveBlueprint" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-journal-plus text-primary me-2"></i>Tạo Khung Đề thi (MockTestBlueprint)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tên Đề thi / Blueprint <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" class="form-control rounded-3" required
+                               placeholder="VD: ETS 2026 Full Mock Test #02 (Listening & Reading)" />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label small fw-bold">Loại Đề thi (BlueprintTestType)</label>
+                            <select name="TestType" class="form-select rounded-3">
+                                @foreach (var mode in Enum.GetValues<BlueprintTestType>())
+                                {
+                                    <option value="@mode">@mode</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold">Thời lượng (Phút)</label>
+                            <input type="number" name="DurationMinutes" class="form-control rounded-3" value="120" min="10" max="240" required />
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="AutoFillPublishedGroups" value="true" id="bpAutoFillSwitch" checked />
+                        <label class="form-check-label small fw-semibold" for="bpAutoFillSwitch">Tự động bốc ngay các cụm đề PUBLISHED sau khi tạo</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="IsActive" value="true" id="bpActiveSwitch" checked />
+                        <label class="form-check-label small fw-semibold" for="bpActiveSwitch">Kích hoạt mở cho Học viên thi ngay</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Lưu Khung Đề thi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

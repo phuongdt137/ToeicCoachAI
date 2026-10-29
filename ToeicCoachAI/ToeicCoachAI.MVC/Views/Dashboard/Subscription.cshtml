@@ -1,0 +1,202 @@
+@model ToeicCoachAI.Model.DTOs.Dashboard.SubscriptionAndWalletPageDto
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Ví AI Credits & Gói cước";
+    ViewData["ActiveNav"] = "Subscription";
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <h2 class="fw-extrabold mb-1" style="font-size: 1.85rem; letter-spacing: -0.02em;">Ví AI Credits &amp; Gói cước</h2>
+        <p class="text-muted mb-0" style="font-size: 0.92rem;">
+            Quản lý gói học viên hiện tại (`UserSubscription` - UC-12) và theo dõi sổ cái giao dịch AI Credits (`CreditTransaction` - UC-13).
+        </p>
+    </div>
+</div>
+
+<!-- Current Subscription & Wallet Overview Banner -->
+<div class="tc-db-hero-card mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge rounded-pill @(Model.Summary.IsPaidTier ? "bg-warning text-dark" : "bg-secondary") px-3 py-1 fw-bold">
+                    @(Model.Summary.IsPaidTier ? "HỌC VIÊN PRO (PAID)" : "HỌC VIÊN MIỄN PHÍ (FREE)")
+                </span>
+                @if (Model.Summary.IsPaidTier && Model.Summary.SubscriptionDaysRemaining > 0)
+                {
+                    <span class="small fw-semibold text-primary">
+                        • Còn @Model.Summary.SubscriptionDaysRemaining ngày hiệu lực
+                    </span>
+                }
+            </div>
+            <h3 class="fw-extrabold text-dark mb-2" style="font-size: 1.55rem;">
+                @Model.Summary.SubscriptionPlanName
+            </h3>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                @if (Model.Summary.IsPaidTier)
+                {
+                    <span>Bạn đã mở khóa toàn bộ Lộ trình cá nhân hóa 3 kỹ năng, Đề thi thử Full 200 câu và Hạn mức phân tích AI <strong>@Model.Summary.DailyAnalysisLimit lượt/ngày</strong>.</span>
+                }
+                else
+                {
+                    <span>Nâng cấp lên gói trả phí để mở khóa trọn bộ Đề thi thử Full 200 câu, Lộ trình AI cá nhân hóa và nhận ngay 300–1.000 AI Credits.</span>
+                }
+            </p>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="bg-white rounded-4 p-3 border shadow-sm text-center h-100">
+                        <div class="text-warning mb-1"><i class="bi bi-lightning-charge-fill fs-4"></i></div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Số dư Ví AI Credits</div>
+                        <div class="fw-extrabold fs-3 text-dark lh-1 mt-1">@Model.Summary.CreditBalance</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="bg-white rounded-4 p-3 border shadow-sm text-center h-100">
+                        <div class="text-primary mb-1"><i class="bi bi-cpu fs-4"></i></div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Hạn mức AI hôm nay</div>
+                        <div class="fw-extrabold fs-3 text-dark lh-1 mt-1">@Model.Summary.DailyAnalysisUsed/@Model.Summary.DailyAnalysisLimit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription Plans Section (UC-12) -->
+<h5 class="fw-bold mb-3">Chọn gói nâng cấp lộ trình (`SubscriptionPlan`)</h5>
+<div class="row g-4 mb-4">
+    <!-- Free Starter Card -->
+    <div class="col-lg-4">
+        <div class="tc-db-card d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge rounded-pill bg-light text-secondary border fw-bold">FREE STARTER</span>
+                <span class="text-muted small">Mặc định</span>
+            </div>
+            <h5 class="fw-extrabold text-dark mb-1">Gói Khởi Đầu</h5>
+            <div class="my-2">
+                <span class="fw-extrabold fs-2 text-dark">0đ</span>
+                <span class="text-muted small">/ trọn đời</span>
+            </div>
+            <p class="text-muted small mb-3">Dành cho học viên mới làm quen cấu trúc đề và kiểm tra trình độ đầu vào.</p>
+
+            <ul class="list-unstyled small d-flex flex-column gap-2 mb-4">
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>10 AI Credits tặng sẵn khi đăng ký</li>
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Làm bài Kiểm tra chẩn đoán (`GUEST_PLACEMENT`)</li>
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Ôn từ vựng Flashcard SRS cơ bản</li>
+                <li class="text-muted"><i class="bi bi-x-circle me-2"></i>Giới hạn 3 lượt phân tích AI / ngày</li>
+            </ul>
+
+            <div class="mt-auto">
+                <button type="button" class="tc-db-btn-outline w-100" disabled>
+                    @(!Model.Summary.IsPaidTier ? "Đang sử dụng" : "Gói mặc định")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @foreach (var plan in Model.Plans)
+    {
+        <div class="col-lg-4">
+            <div class="tc-db-card d-flex flex-column" style="@(plan.IsPopular ? "border: 2px solid #3B5BDB;" : "")">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge rounded-pill @(plan.IsPopular ? "bg-primary text-white" : "bg-warning text-dark") fw-bold">
+                        @plan.Code
+                    </span>
+                    @if (plan.IsPopular)
+                    {
+                        <span class="badge rounded-pill" style="background: #ECFDF5; color: #059669;">Phổ biến nhất</span>
+                    }
+                </div>
+                <h5 class="fw-extrabold text-dark mb-1">@plan.Name</h5>
+                <div class="my-2">
+                    <span class="fw-extrabold fs-2 text-primary">@plan.PriceVnd.ToString("N0")đ</span>
+                    <span class="text-muted small">/ @plan.DurationDays ngày</span>
+                </div>
+                <p class="text-muted small mb-3">
+                    Mở khóa toàn bộ lộ trình 3 kỹ năng Listening, Reading, Writing và kho đề thi thử chuẩn ETS.
+                </p>
+
+                <ul class="list-unstyled small d-flex flex-column gap-2 mb-4">
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i>Cấp ngay <strong>+@plan.GrantedCredits AI Credits</strong> vào ví</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i>Hạn mức phân tích sâu <strong>@plan.DailyAnalysisLimit lượt / ngày</strong></li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i>Mở khóa trọn bộ Đề thi thử Full 200 câu &amp; Writing</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i>Chấm bài Writing AI chi tiết (3 Credits/bài) &amp; Hỏi đáp ngữ cảnh</li>
+                </ul>
+
+                <div class="mt-auto">
+                    <form asp-controller="Dashboard" asp-action="PurchasePlan" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="planId" value="@plan.Id" />
+                        <button type="submit" class="@(plan.IsPopular ? "tc-db-btn-primary" : "tc-db-btn-outline") w-100 py-2">
+                            <i class="bi bi-credit-card-2-front"></i> Đăng ký gói này
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Credit Transaction History Table (UC-13) -->
+<div class="tc-db-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h6 class="fw-bold mb-1">
+                <i class="bi bi-receipt text-primary me-1"></i>Lịch sử biến động Ví AI Credits (`CreditTransaction`)
+            </h6>
+            <p class="text-muted small mb-0">
+                Cơ chế trừ/hoàn tiền chuẩn xác: <code>HOLD (PENDING)</code> khi gửi yêu cầu AI $\rightarrow$ <code>COMMIT (COMPLETED)</code> khi AI trả kết quả hoặc <code>REFUND (REFUNDED)</code> nếu lỗi.
+            </p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle mb-0 small">
+            <thead class="table-light">
+                <tr>
+                    <th>Thời gian</th>
+                    <th>Mã giao dịch</th>
+                    <th>Loại giao dịch (`TxType`)</th>
+                    <th>Tính năng</th>
+                    <th class="text-end">Biến động</th>
+                    <th class="text-end">Số dư sau GD</th>
+                    <th class="text-center">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Transactions.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">Chưa có giao dịch nào được ghi nhận.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var tx in Model.Transactions)
+                    {
+                        var isPositive = tx.Amount > 0;
+                        <tr>
+                            <td class="text-muted">@tx.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><code>@tx.PaymentOrderCode</code></td>
+                            <td><span class="badge bg-light text-dark border">@tx.TxType</span></td>
+                            <td class="fw-medium">@tx.FeatureName</td>
+                            <td class="text-end fw-bold @(isPositive ? "text-success" : "text-danger")">
+                                @(isPositive ? $"+{tx.Amount}" : tx.Amount.ToString()) Credits
+                            </td>
+                            <td class="text-end fw-bold">@tx.BalanceAfter Credits</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill @(tx.Status == "COMPLETED" ? "bg-success" : "bg-warning text-dark")">
+                                    @tx.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -13,8 +13,18 @@ namespace ToeicCoachAI.MVC.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(bool landing = false)
         {
+            if (User.Identity?.IsAuthenticated == true && !landing)
+            {
+                if (User.IsInRole("SYSTEM_ADMIN"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             return View();
         }
 
